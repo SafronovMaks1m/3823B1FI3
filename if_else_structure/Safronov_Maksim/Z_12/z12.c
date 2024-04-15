@@ -21,6 +21,15 @@ class Vector{
                 _array[i] = array[i];}
         }
 
+        Vector(int size){
+            _size = size;
+            _array = new T[_size];
+            for (int i = 0; i<_size; i++){
+                _array[i] = 0;
+            }
+        }
+
+
         Vector(std::initializer_list<T> list){
             _size = list.size();
             int i = 0;
@@ -32,13 +41,26 @@ class Vector{
         }
 
         Vector operator+(const Vector& obj){
+            try{
+                this->Proverka(obj);}
+            catch (const char* error_message){
+                std::cout << error_message << std::endl; throw;}
             Vector s = Vector (obj._size, obj._array);
             for (int i = 0; i<_size; i++){
                 s._array[i] = _array[i]+obj._array[i];}
             return s;
         }
 
+        void Proverka(const Vector& obj){
+            if (_size!=obj._size){
+                throw "Размеры не совпадают";}
+        }
+
         Vector operator-(const Vector& obj){
+            try{
+                this->Proverka(obj);}
+            catch (const char* error_message){
+                std::cout << error_message << std::endl; throw;}
             Vector s = Vector (obj._size, obj._array);
             for (int i = 0; i<_size; i++){
                s._array[i] = _array[i]-obj._array[i];}
@@ -46,6 +68,10 @@ class Vector{
         }
 
         Vector operator*(Vector& obj){
+            try{
+                this->Proverka(obj);}
+            catch (const char* error_message){
+                std::cout << error_message << std::endl; throw;}
             Vector s = Vector();
             for (int i = 0; i<obj._size; i++){
                 s._array[0]+=_array[i]*obj._array[i];}
@@ -54,12 +80,6 @@ class Vector{
             return s;
         }
 
-        Vector(size_t size) : _size(size){
-            _array = new T[_size];
-            for (int i = 0; i<_size; i++){
-                _array[i] = 0;
-            }
-        }
 
         double search_length(Vector vector){
             double s = sqrt( double (vector.operator*(vector)._array[0]));
@@ -99,11 +119,17 @@ class Vector{
 
             return os;
         }
+
+        ~Vector(){
+        delete [] _array;
+        }
+
         friend std::istream& operator>>(std::istream& is, Vector& obj){
             T arr[obj._size] = {};
             for (int i = 0; i<obj._size; i++){
                 std :: cout << "[" << i+1 << "] = ";
                 is >> obj._array[i];}
+            std::cout << std::endl;
             return is;
         }
 };
@@ -117,18 +143,13 @@ public:
     Matrix(){
         _size = 3;
         _vectors = new Vector<T>[_size];
-        for (int i = 0; i<_size; i++){
-            std::cin >> _vectors[i];
-        }
     }
 
     Matrix(int n){
         _size = n;
-        _vectors = new Vector<T>[_size];
+        _vectors = new Vector<T> [_size];
         for (int i = 0; i<_size; i++){
-            for (int j = 0; j<_size; j++){
-                _vectors[i][j] = 0;
-            }
+            _vectors[i] = Vector<T>(_size);
         }
     }
 
@@ -141,7 +162,7 @@ public:
         {
             throw "Invalid matrix size!";
         }
-        Matrix n = Matrix();
+        Matrix n = Matrix(m._size);
         // for (size_t i = 0; i < _size; i++)
         // {
         //     n[i] = (*this)[i] + m[i];
@@ -160,10 +181,10 @@ public:
         {
             throw "Invalid matrix size!";
         }
-        Matrix n = Matrix();
+        Matrix n = Matrix(m._size);
         for (int i = 0; i < _size; ++i){
             for (int j = 0; j < _size; j++){
-                n[i][j] = _vectors[i][j] + m._vectors[i][j];
+                n[i][j] = _vectors[i][j] - m._vectors[i][j];
             }
         }
         return n;
@@ -172,9 +193,7 @@ public:
 
 
     Matrix operator*(Matrix& obj){
-        std::cout << obj;
-        std::cout << (*this);
-        Matrix s = Matrix(0);
+        Matrix s = Matrix(obj._size);
         for (int i = 0; i<_size; i++){
             for (int j = 0; j<_size; j++){
                 for (int k = 0; k<obj._size; k++){
@@ -189,6 +208,7 @@ public:
         return (matrix[0]*matrix[4]*matrix[8]+matrix[1]*matrix[5]*matrix[6]+matrix[3]*matrix[7]*matrix[2]-matrix[2]*matrix[4]*matrix[6]-matrix[1]*matrix[3]*matrix[8]-matrix[0]*matrix[5]*matrix[7]);}
     
     T det(Matrix mas){
+        std::cout << mas << std::endl;
         T* matrix = new T [mas._size*mas._size];
         for (int i = 0; i<mas._size; i++){
             for (int j = 0; j<mas._size; j++){
@@ -258,6 +278,10 @@ public:
         return s;
     }
 
+    ~Matrix(){
+        delete [] _vectors;
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const Matrix& matrix){
         for (size_t i =0; i < matrix._size; i++)
             os << matrix._vectors[i];
@@ -265,11 +289,34 @@ public:
         return os;
     }
 
-
+    friend std::istream& operator>>(std::istream& is, Matrix& obj){
+            std::cout << "Введите размер матрицы : ";
+            is >> obj._size;
+            obj._vectors = new Vector<T>[obj._size];
+            for (int i = 0; i<obj._size; i++){
+                obj._vectors[i] = Vector<T>(obj._size);
+                std::cin >> obj._vectors[i];
+            }
+            return is;
+        }
 
 };
 
 
 int main(){
     Matrix<double> m1;
+    std::cin >> m1;
+    Matrix<double> m2;
+    std::cin >> m2;
+    // std::cout << m1*m2 << std::endl;
+    std::cout << m1+m2 << std::endl;
+    // std::cout << m1-m2 << std::endl;
+    // std::cout << m1/m2 << std::endl;
+    // std::cout << m1.matrix_transponded() << std::endl;
+    // std::cout << m1.det(m1) << std::endl;
+    // Vector s = Vector<int>(3);
+    // std::cin >> s;
+    // Vector c = Vector<int>(4);
+    // std::cin >> c;
+    // std::cout << s+c << std::endl;
 }
