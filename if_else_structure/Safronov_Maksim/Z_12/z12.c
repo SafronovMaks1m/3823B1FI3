@@ -1,5 +1,6 @@
 #include <iostream>
 #include <math.h>
+#include <time.h> 
 
 template<typename T>
 
@@ -45,7 +46,7 @@ class Vector{
                 this->Proverka(obj);}
             catch (const char* error_message){
                 std::cout << error_message << std::endl; throw;}
-            Vector s = Vector (obj._size, obj._array);
+            Vector s = Vector(obj._size, obj._array);
             for (int i = 0; i<_size; i++){
                 s._array[i] = _array[i]+obj._array[i];}
             return s;
@@ -120,9 +121,7 @@ class Vector{
             return os;
         }
 
-        ~Vector(){
-        delete [] _array;
-        }
+        ~Vector(){}
 
         friend std::istream& operator>>(std::istream& is, Vector& obj){
             T arr[obj._size] = {};
@@ -190,8 +189,6 @@ public:
         return n;
     }  
 
-
-
     Matrix operator*(Matrix& obj){
         Matrix s = Matrix(obj._size);
         for (int i = 0; i<_size; i++){
@@ -203,41 +200,19 @@ public:
         }
         return s;
     }
-
-    T det_3(T* matrix){
-        return (matrix[0]*matrix[4]*matrix[8]+matrix[1]*matrix[5]*matrix[6]+matrix[3]*matrix[7]*matrix[2]-matrix[2]*matrix[4]*matrix[6]-matrix[1]*matrix[3]*matrix[8]-matrix[0]*matrix[5]*matrix[7]);}
     
-    T det(Matrix mas){
-        std::cout << mas << std::endl;
-        T* matrix = new T [mas._size*mas._size];
-        for (int i = 0; i<mas._size; i++){
-            for (int j = 0; j<mas._size; j++){
-                matrix[i*_size+j] = mas._vectors[i][j];
-            }
-        } 
-        if (mas._size == 2){return (matrix[0]*matrix[3] - matrix[1]*matrix[2]);}
-        if (mas._size == 3){return det_3(matrix);}
-        int k = mas._size;
-        int d = 0, t = 1, total = 0;
-        T* s = new T [(k-1)*(k-1)];
-        for (int i = 0; i<k*k; i++){
-            total = 0;
-            if (i%k == 0){
-                t = matrix[i]*pow(-1, (i/k+1)+1);
-                for (int j = 0; j<k*k; j++){
-                    if (j/k!=i/k && j%k!=0){
-                        s[total] = matrix[j]; total+=1;}}
-            if ((k-1)*(k-1) == 9){
-                d+= t*det_3(s);}
-            else{
-                Matrix lol = Matrix(0);
-                lol._size = k-1;
-                for (int q = 0; q<lol._size; q++){
-                    for (int j = 0; j<lol._size; j++){
-                        lol._vectors[q][j] = s[lol._size*q+j];
-                    }}
-                d+=t*det(lol);}}}
-        return d; 
+    T det(){
+        long double ved_elem = 0;
+        for (int i = 0; i<_size; i++){
+            ved_elem = _vectors[i][i];
+            for (int j = 0; j<_size; j++){
+                long double subtra = _vectors[j][i]/ved_elem;
+                if (j>i){
+                    for(int k = 0; k<_size+1; k++){
+                        _vectors[j][k] = _vectors[j][k]-(subtra*_vectors[i][k]);}}}}
+        ved_elem = 1;
+        for(int i = 0; i<_size; i++){ved_elem*=_vectors[i][i];} 
+        return ved_elem;
     }
 
     Matrix operator/(Matrix& obj){
@@ -278,9 +253,7 @@ public:
         return s;
     }
 
-    ~Matrix(){
-        delete [] _vectors;
-    }
+    ~Matrix(){}
 
     friend std::ostream& operator<<(std::ostream& os, const Matrix& matrix){
         for (size_t i =0; i < matrix._size; i++)
@@ -304,12 +277,16 @@ public:
 
 
 int main(){
+    time_t start, end;
+    time(&start);
+
     Matrix<double> m1;
     std::cin >> m1;
     Matrix<double> m2;
     std::cin >> m2;
-    // std::cout << m1*m2 << std::endl;
     std::cout << m1+m2 << std::endl;
+
+    // std::cout << m1.det() << std::endl;
     // std::cout << m1-m2 << std::endl;
     // std::cout << m1/m2 << std::endl;
     // std::cout << m1.matrix_transponded() << std::endl;
@@ -319,4 +296,7 @@ int main(){
     // Vector c = Vector<int>(4);
     // std::cin >> c;
     // std::cout << s+c << std::endl;
+    time(&end);
+    double seconds = difftime(end, start);
+    std::cout << "The time: " << seconds << " seconds" <<std::endl;
 }
