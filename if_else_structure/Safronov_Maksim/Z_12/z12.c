@@ -126,8 +126,8 @@ class Vector{
         friend std::istream& operator>>(std::istream& is, Vector& obj){
             T arr[obj._size] = {};
             for (int i = 0; i<obj._size; i++){
-                std :: cout << "[" << i+1 << "] = ";
-                is >> obj._array[i];}
+                obj._array[i] = 0 + rand() % 10;}
+            std::cout << obj;
             std::cout << std::endl;
             return is;
         }
@@ -190,6 +190,8 @@ public:
     }  
 
     Matrix operator*(Matrix& obj){
+        std::cout << (*this) << std::endl;
+        std::cout << obj << std::endl;
         Matrix s = Matrix(obj._size);
         for (int i = 0; i<_size; i++){
             for (int j = 0; j<_size; j++){
@@ -199,6 +201,15 @@ public:
             }
         }
         return s;
+    }
+
+    Matrix(const Matrix& obj){
+        _size = obj._size;
+        for (int i = 0; i<_size; i++){
+            for (int j = 0; j<_size; j++){
+                obj._vectors[i][j] = _vectors[i][j];
+            }
+        }
     }
     
     T det(){
@@ -282,20 +293,9 @@ int main(){
 
     Matrix<double> m1;
     std::cin >> m1;
-    Matrix<double> m2;
-    std::cin >> m2;
-    std::cout << m1+m2 << std::endl;
-
-    // std::cout << m1.det() << std::endl;
-    // std::cout << m1-m2 << std::endl;
-    // std::cout << m1/m2 << std::endl;
-    // std::cout << m1.matrix_transponded() << std::endl;
-    // std::cout << m1.det(m1) << std::endl;
-    // Vector s = Vector<int>(3);
-    // std::cin >> s;
-    // Vector c = Vector<int>(4);
-    // std::cin >> c;
-    // std::cout << s+c << std::endl;
+    Matrix<double> m2 = m1;
+    Matrix c = m1.inverse_matrix();
+    std::cout << m2*c;
     time(&end);
     double seconds = difftime(end, start);
     std::cout << "The time: " << seconds << " seconds" <<std::endl;
