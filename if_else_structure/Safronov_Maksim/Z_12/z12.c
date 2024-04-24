@@ -126,175 +126,199 @@ class Vector{
         friend std::istream& operator>>(std::istream& is, Vector& obj){
             T arr[obj._size] = {};
             for (int i = 0; i<obj._size; i++){
-                obj._array[i] = 0 + rand() % 10;}
+                obj._array[i] = 1 + rand() % 10;}
             std::cout << obj;
-            std::cout << std::endl;
             return is;
         }
 };
 
 template<typename T>
 class Matrix{
-private:
-    size_t _size;
-    Vector<T>* _vectors;
-public:
-    Matrix(){
-        _size = 3;
-        _vectors = new Vector<T>[_size];
-    }
-
-    Matrix(int n){
-        _size = n;
-        _vectors = new Vector<T> [_size];
-        for (int i = 0; i<_size; i++){
-            _vectors[i] = Vector<T>(_size);
+    private:
+        size_t _size;
+        Vector<T>* _vectors;
+    public:
+        Matrix(){
+            _size = 3;
+            _vectors = new Vector<T>[_size];
         }
-    }
 
-    Vector<T>& operator[](int index) const{
-        return _vectors[index];
-    }
-
-    Matrix operator+(const Matrix& m)const{
-        if (_size != m._size)
-        {
-            throw "Invalid matrix size!";
-        }
-        Matrix n = Matrix(m._size);
-        // for (size_t i = 0; i < _size; i++)
-        // {
-        //     n[i] = (*this)[i] + m[i];
-        // }
-    
-        for (int i = 0; i < _size; ++i){
-            for (int j = 0; j < _size; j++){
-                n[i][j] = _vectors[i][j] + m._vectors[i][j];
+        Matrix(int n){
+            _size = n;
+            _vectors = new Vector<T> [_size];
+            for (int i = 0; i<_size; i++){
+                _vectors[i] = Vector<T>(_size);
             }
         }
-        return n;
-    }
 
-    Matrix operator-(const Matrix& m)const{ 
-        if (_size != m._size)
-        {
-            throw "Invalid matrix size!";
+        Vector<T>& operator[](int index) const{
+            return _vectors[index];
         }
-        Matrix n = Matrix(m._size);
-        for (int i = 0; i < _size; ++i){
-            for (int j = 0; j < _size; j++){
-                n[i][j] = _vectors[i][j] - m._vectors[i][j];
+
+        Matrix operator+(const Matrix& m)const{
+            if (_size != m._size)
+            {
+                throw "Invalid matrix size!";
             }
+            Matrix n = Matrix(m._size);
+            // for (size_t i = 0; i < _size; i++)
+            // {
+            //     n[i] = (*this)[i] + m[i];
+            // }
+        
+            for (int i = 0; i < _size; ++i){
+                for (int j = 0; j < _size; j++){
+                    n[i][j] = _vectors[i][j] + m._vectors[i][j];
+                }
+            }
+            return n;
         }
-        return n;
-    }  
 
-    Matrix operator*(Matrix& obj){
-        std::cout << (*this) << std::endl;
-        std::cout << obj << std::endl;
-        Matrix s = Matrix(obj._size);
-        for (int i = 0; i<_size; i++){
-            for (int j = 0; j<_size; j++){
-                for (int k = 0; k<obj._size; k++){
-                    s._vectors[i][j]+= _vectors[i][k]*obj._vectors[k][j];
+        Matrix operator-(const Matrix& m)const{ 
+            if (_size != m._size)
+            {
+                throw "Invalid matrix size!";
+            }
+            Matrix n = Matrix(m._size);
+            for (int i = 0; i < _size; ++i){
+                for (int j = 0; j < _size; j++){
+                    n[i][j] = _vectors[i][j] - m._vectors[i][j];
+                }
+            }
+            return n;
+        }  
+
+        Matrix operator*(Matrix& obj){
+            std::cout << (*this) << std::endl;
+            std::cout << obj << std::endl;
+            Matrix s = Matrix(obj._size);
+            for (int i = 0; i<_size; i++){
+                for (int j = 0; j<_size; j++){
+                    for (int k = 0; k<obj._size; k++){
+                        s._vectors[i][j]+= _vectors[i][k]*obj._vectors[k][j];
+                    }
+                }
+            }
+            return s;
+        }
+
+        Matrix(const Matrix& obj){
+            _size = obj._size;
+            _vectors = new Vector<T>[_size];
+            for (int i = 0; i<_size; i++){
+                _vectors[i] = Vector<T>(_size);}
+            for (int i = 0; i<_size; i++){
+                for (int j = 0; j<_size; j++){
+                    _vectors[i][j] = obj._vectors[i][j];
                 }
             }
         }
-        return s;
-    }
-
-    Matrix(const Matrix& obj){
-        _size = obj._size;
-        for (int i = 0; i<_size; i++){
-            for (int j = 0; j<_size; j++){
-                obj._vectors[i][j] = _vectors[i][j];
-            }
-        }
-    }
-    
-    T det(){
-        long double ved_elem = 0;
-        for (int i = 0; i<_size; i++){
-            ved_elem = _vectors[i][i];
-            for (int j = 0; j<_size; j++){
-                long double subtra = _vectors[j][i]/ved_elem;
-                if (j>i){
-                    for(int k = 0; k<_size+1; k++){
-                        _vectors[j][k] = _vectors[j][k]-(subtra*_vectors[i][k]);}}}}
-        ved_elem = 1;
-        for(int i = 0; i<_size; i++){ved_elem*=_vectors[i][i];} 
-        return ved_elem;
-    }
-
-    Matrix operator/(Matrix& obj){
-        Matrix inv = obj.inverse_matrix();
-        Matrix itog = (*this)*inv;
-        return itog;
-    }
-
-    Matrix matrix_transponded(){
-        Matrix s = Matrix(_size);
-        for (int i = 0; i<_size; i++){
-            for (int j = 0; j<_size; j++){
-                s._vectors[i][j] = _vectors[j][i];
-            }
-        }
-        return s;
-    }
-
-    Matrix inverse_matrix(){
-        Matrix<double> s = Matrix(_size);
-        for (int i = 0; i<_size; i++){
-            for (int j = 0; j<_size; j++){
-                if (i == j) s[i][j] = 1;}}
-        double ved_elem = 0;
-        for (int i = 0; i<_size; i++){
-            ved_elem = _vectors[i][i];
-            for (int j = 0; j<_size; j++){
-                _vectors[i][j]/=ved_elem;
-                s._vectors[i][j]/=ved_elem;
-            }
-            ved_elem = _vectors[i][i];
-            for (int j = 0; j<_size; j++){
-                double subtra = _vectors[j][i]/ved_elem;
-                if (j!=i){
-                    for(int k = 0; k<_size+1; k++){
-                        _vectors[j][k] = _vectors[j][k]-(subtra*_vectors[i][k]);
-                        s._vectors[j][k] = s._vectors[j][k]-(subtra*s._vectors[i][k]);}}}}
-        return s;
-    }
-
-    ~Matrix(){}
-
-    friend std::ostream& operator<<(std::ostream& os, const Matrix& matrix){
-        for (size_t i =0; i < matrix._size; i++)
-            os << matrix._vectors[i];
-        os << std::endl;
-        return os;
-    }
-
-    friend std::istream& operator>>(std::istream& is, Matrix& obj){
-            std::cout << "Введите размер матрицы : ";
-            is >> obj._size;
-            obj._vectors = new Vector<T>[obj._size];
-            for (int i = 0; i<obj._size; i++){
-                obj._vectors[i] = Vector<T>(obj._size);
-                std::cin >> obj._vectors[i];
-            }
-            return is;
+        
+        T det(){
+            long double ved_elem = 0;
+            for (int i = 0; i<_size; i++){
+                if (_vectors[i][i] == 0){
+                    this->replace_zero(i);}
+                ved_elem = _vectors[i][i];
+                for (int j = 0; j<_size; j++){
+                    long double subtra = _vectors[j][i]/ved_elem;
+                    if (j>i){
+                        for(int k = 0; k<_size+1; k++){
+                            _vectors[j][k] = _vectors[j][k]-(subtra*_vectors[i][k]);}}}}
+            ved_elem = 1;
+            for(int i = 0; i<_size; i++){ved_elem*=_vectors[i][i];} 
+            return ved_elem;
         }
 
+        Matrix operator/(Matrix& obj){
+            Matrix inv = obj.inverse_matrix();
+            Matrix itog = (*this)*inv;
+            return itog;
+        }
+
+        Matrix matrix_transponded(){
+            Matrix s = Matrix(_size);
+            for (int i = 0; i<_size; i++){
+                for (int j = 0; j<_size; j++){
+                    s._vectors[i][j] = _vectors[j][i];
+                }
+            }
+            return s;
+        }
+
+        void replace_zero(int col){
+            int no_zero = 0;
+            for (int j = 0; j<_size; j++){
+                if (_vectors[j][col]!=0){
+                    no_zero = j; break;}}
+            if (no_zero == 0){
+                try{
+                    throw "DET = 0!";}
+                catch(const char* error_message){
+                    std::cout << error_message;}}
+            for (int i = 0; i<_size; i++){
+                for (int j = 0; j<_size; j++){
+                    if (i == no_zero){
+                        long double a = _vectors[col][j];
+                        _vectors[col][j] = _vectors[i][j];
+                        _vectors[i][j] = a;}}}
+        }
+
+        Matrix inverse_matrix(){
+            Matrix<float> s = Matrix(_size);
+            for (int i = 0; i<_size; i++){
+                for (int j = 0; j<_size; j++){
+                    if (i == j) s[i][j] = 1;}}
+            double ved_elem = 0;
+            for (int i = 0; i<_size; i++){
+                if (_vectors[i][i] == 0){
+                    this->replace_zero(i);}
+                ved_elem = _vectors[i][i];
+                for (int j = 0; j<_size; j++){
+                    _vectors[i][j]/=ved_elem;
+                    s._vectors[i][j]/=ved_elem;
+                }
+                ved_elem = _vectors[i][i];
+                for (int j = 0; j<_size; j++){
+                    double subtra = _vectors[j][i]/ved_elem;
+                    if (j!=i){
+                        for(int k = 0; k<_size+1; k++){
+                            _vectors[j][k] = _vectors[j][k]-(subtra*_vectors[i][k]);
+                            s._vectors[j][k] = s._vectors[j][k]-(subtra*s._vectors[i][k]);}}}}
+            return s;
+        }
+
+        ~Matrix(){}
+
+        friend std::ostream& operator<<(std::ostream& os, const Matrix& matrix){
+            for (size_t i =0; i < matrix._size; i++)
+                os << matrix._vectors[i];
+            os << std::endl;
+            return os;
+        }
+
+        friend std::istream& operator>>(std::istream& is, Matrix& obj){
+                std::cout << "Введите размер матрицы : ";
+                is >> obj._size;
+                obj._vectors = new Vector<T>[obj._size];
+                for (int i = 0; i<obj._size; i++){
+                    obj._vectors[i] = Vector<T>(obj._size);
+                    std::cin >> obj._vectors[i];
+                }
+                std::cout<<std::endl;
+                return is;
+            }
 };
 
 
 int main(){
+    srand(time(0));
     time_t start, end;
     time(&start);
-
-    Matrix<double> m1;
+    Matrix<float> m1;
     std::cin >> m1;
-    Matrix<double> m2 = m1;
-    Matrix c = m1.inverse_matrix();
+    Matrix<float> m2 = m1;
+    Matrix<float> c = m1.inverse_matrix();
     std::cout << m2*c;
     time(&end);
     double seconds = difftime(end, start);
