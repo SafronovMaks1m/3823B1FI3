@@ -124,10 +124,8 @@ class Vector{
         ~Vector(){}
 
         friend std::istream& operator>>(std::istream& is, Vector& obj){
-            T arr[obj._size] = {};
             for (int i = 0; i<obj._size; i++){
-                obj._array[i] = 1 + rand() % 10;}
-            std::cout << obj;
+                std::cout << "[" << i << "] = "; std::cin >> obj._array[i];}
             return is;
         }
 };
@@ -137,13 +135,16 @@ class Matrix{
     private:
         size_t _size;
         Vector<T>* _vectors;
+        bool _flag;
     public:
         Matrix(){
+            _flag = false;
             _size = 3;
             _vectors = new Vector<T>[_size];
         }
 
         Matrix(int n){
+            _flag = false;
             _size = n;
             _vectors = new Vector<T> [_size];
             for (int i = 0; i<_size; i++){
@@ -189,9 +190,10 @@ class Matrix{
         }  
 
         Matrix operator*(Matrix& obj){
-            std::cout << (*this) << std::endl;
-            std::cout << obj << std::endl;
             Matrix s = Matrix(obj._size);
+            if (obj._flag == true){
+                s._flag = obj._flag;
+                return s;}
             for (int i = 0; i<_size; i++){
                 for (int j = 0; j<_size; j++){
                     for (int k = 0; k<obj._size; k++){
@@ -203,6 +205,7 @@ class Matrix{
         }
 
         Matrix(const Matrix& obj){
+            _flag = obj._flag;
             _size = obj._size;
             _vectors = new Vector<T>[_size];
             for (int i = 0; i<_size; i++){
@@ -218,7 +221,11 @@ class Matrix{
             long double ved_elem = 0;
             for (int i = 0; i<_size; i++){
                 if (_vectors[i][i] == 0){
-                    this->replace_zero(i);}
+                    try{
+                        this->replace_zero(i);}
+                    catch(const char* error_message){
+                        std::cout << error_message; return;}
+                    }
                 ved_elem = _vectors[i][i];
                 for (int j = 0; j<_size; j++){
                     long double subtra = _vectors[j][i]/ved_elem;
@@ -232,6 +239,8 @@ class Matrix{
 
         Matrix operator/(Matrix& obj){
             Matrix inv = obj.inverse_matrix();
+            if (inv._flag == true){
+                return inv;}
             Matrix itog = (*this)*inv;
             return itog;
         }
@@ -252,10 +261,7 @@ class Matrix{
                 if (_vectors[j][col]!=0){
                     no_zero = j; break;}}
             if (no_zero == 0){
-                try{
-                    throw "DET = 0!";}
-                catch(const char* error_message){
-                    std::cout << error_message;}}
+                throw "DET = 0! ";}
             for (int i = 0; i<_size; i++){
                 for (int j = 0; j<_size; j++){
                     if (i == no_zero){
@@ -272,7 +278,11 @@ class Matrix{
             double ved_elem = 0;
             for (int i = 0; i<_size; i++){
                 if (_vectors[i][i] == 0){
-                    this->replace_zero(i);}
+                    try{
+                        this->replace_zero(i);}
+                    catch(const char* error_message){
+                        std::cout << error_message; s._flag = true; return s;}
+                    }
                 ved_elem = _vectors[i][i];
                 for (int j = 0; j<_size; j++){
                     _vectors[i][j]/=ved_elem;
@@ -291,6 +301,8 @@ class Matrix{
         ~Matrix(){}
 
         friend std::ostream& operator<<(std::ostream& os, const Matrix& matrix){
+            if (matrix._flag == true){
+                return os;}
             for (size_t i =0; i < matrix._size; i++)
                 os << matrix._vectors[i];
             os << std::endl;
@@ -304,6 +316,7 @@ class Matrix{
                 for (int i = 0; i<obj._size; i++){
                     obj._vectors[i] = Vector<T>(obj._size);
                     std::cin >> obj._vectors[i];
+                    std::cout << std::endl;
                 }
                 std::cout<<std::endl;
                 return is;
