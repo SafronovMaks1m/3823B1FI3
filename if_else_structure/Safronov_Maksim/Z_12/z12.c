@@ -255,6 +255,10 @@ class Matrix{
             return s;
         }
 
+        ~Matrix(){
+            delete [] _vectors;
+        }
+
         void replace_zero(int col){
             int no_zero = 0;
             for (int j = 0; j<_size; j++){
@@ -268,6 +272,16 @@ class Matrix{
                         long double a = _vectors[col][j];
                         _vectors[col][j] = _vectors[i][j];
                         _vectors[i][j] = a;}}}
+        }
+
+        friend Matrix operator*(int a, Matrix& obj){
+            Matrix s = obj;
+            for (int i = 0; i<obj._size; i++){
+                for (int j = 0; j<obj._size; j++){
+                    s[i][j]*=3;
+                }
+            }
+            return s;
         }
 
         Matrix inverse_matrix(){
@@ -298,7 +312,6 @@ class Matrix{
             return s;
         }
 
-        ~Matrix(){}
 
         friend std::ostream& operator<<(std::ostream& os, const Matrix& matrix){
             if (matrix._flag == true){
@@ -328,11 +341,14 @@ int main(){
     srand(time(0));
     time_t start, end;
     time(&start);
-    Matrix<float> m1;
-    std::cin >> m1;
-    Matrix<float> m2 = m1;
-    Matrix<float> c = m1.inverse_matrix();
-    std::cout << m2*c;
+    Matrix<float> a;
+    std::cin >> a;
+    Matrix<float> b;
+    std::cin >> b;
+    Matrix<float> c;
+    std::cin >> c;
+    Matrix <float> prom = (b-3*c);
+    Matrix <float> itog = a/prom;
     time(&end);
     double seconds = difftime(end, start);
     std::cout << "The time: " << seconds << " seconds" <<std::endl;
