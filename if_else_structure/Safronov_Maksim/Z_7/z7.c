@@ -5,14 +5,13 @@
 
 class Base_sensors{
     private:
-        double _min;
-        double _max;
-        int _start; int _end; int _gap;
+        int _start; int _end; double _gap;
     protected:
         double _value;
+        double _min;
+        double _max;
         void Gener(){
-            srand(time(NULL));
-            double a = (_start + rand()%(_end+1))/_gap;
+            double a = (_start + rand()%(_end))/_gap;
             _value+=a;
             _value = std::max(_min,_value); 
             _value = std::min(_max,_value);
@@ -24,7 +23,7 @@ class Base_sensors{
             _start = 10; _end = 200;
             _gap = 10;
         }
-        Base_sensors(int start, int end, int gap, double min, double max){
+        Base_sensors(int start, int end, double gap, double min, double max){
             _min = min; _max = max; _start = start; _end = end; _gap = gap;}
         double operator()(){
             Gener();        
@@ -37,6 +36,7 @@ class co2 : public Base_sensors{
         const double MIN = 0;
         const double MAX = 100;
         co2(int start = -100, int end = 201, double gap = 100.0) : Base_sensors(start, end, gap, MIN, MAX){
+            _min = MIN; _max = MAX;
             _value = rand()%100;
         };
 };
@@ -46,6 +46,7 @@ class Pressure_sensor : public Base_sensors{
         const double MIN = 600;
         const double MAX = 900;
         Pressure_sensor(int start = -300, int end = 601, double gap = 10.0) : Base_sensors(start, end, gap, MIN, MAX){
+            _min = MIN; _max = MAX;
             _value = MIN + rand() % int(MAX - MIN);
         };
 
@@ -56,6 +57,7 @@ class Humidity_sensor : public Base_sensors{
         const double MIN = 0;
         const double MAX = 100;
         Humidity_sensor(int start = 0, int end = 100, double gap = 100.0) : Base_sensors(start, end, gap, MIN, MAX){
+            _min = MIN; _max = MAX;
             _value = (rand() % 100)/100.0;
         }
 };
@@ -64,7 +66,7 @@ class Temp_sensor : public Base_sensors{
     public:
         const double MIN = -93;
         const double MAX = 58;
-        Temp_sensor(int start = -5, int end = 11, double gap = 11.0) : Base_sensors(start, end, gap, MIN, MAX){
+        Temp_sensor(int start = -5, int end = 11, double gap = 10.0) : Base_sensors(start, end, gap, MIN, MAX){
             _value = -5 + rand() % 11;
         };
 };
@@ -83,8 +85,8 @@ enum Direction{
 class Wide : protected Base_sensors{
     private:
         Direction _direction;
-        void gen(){
-            this->Gener();
+        void Gener(){
+            Base_sensors::Gener();
             _direction = static_cast<Direction> (rand()%8);
         }
 
@@ -92,21 +94,22 @@ class Wide : protected Base_sensors{
         const double MIN = 0;
         const double MAX = 30; 
         Wide(int start = -10, int end = 21, double gap = 10) : Base_sensors(start, end, gap, MIN, MAX){
-            _value =  rand()%30;
-            _direction =static_cast<Direction> ( rand());
+            _min = MIN; _max = MAX;
+            _value = rand()%30;
+            _direction = static_cast<Direction> ( rand());
         }
         double GetSpeed(){
-            gen();
+            Gener();
             return _value;
         }
         Direction GetDirection(){
-            gen();
+            Gener();
             return _direction;
         }
     
 };
 
-class Sensors : protected Base_sensors{
+class Sensors{
     private:
         Base_sensors** mas_classes;
         int _total;
@@ -118,12 +121,12 @@ class Sensors : protected Base_sensors{
             mas_classes = new Base_sensors*[_total];
         }
         void AppendClasses(Base_sensors* tmp){
+            if (_total<=_count){
+                std::cout << "Массив заполнен" << std::endl; return;} 
             mas_classes[_count] = tmp;
             _count++;
         }
         ~Sensors(){
-            for (int i = 0; i < _total; i++){
-                delete[] mas_classes[i];}
             delete[] mas_classes;
         }
 
@@ -131,8 +134,7 @@ class Sensors : protected Base_sensors{
 
 
 int main(){
-    Temp_sensor* tmp = new Temp_sensor;
-    Sensors sen = Sensors();
-    sen.AppendClasses(tmp);
-    return 0;
+    srand(time(NULL));
+    Temp_sensor temp = Temp_sensor();
+    std::cout << temp.operator()() << std::endl;
 }
